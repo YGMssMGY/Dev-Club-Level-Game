@@ -10,6 +10,8 @@ public class CameraFollow2D : MonoBehaviour
     [Tooltip("Assign the player (e.g. Square) Transform.")]
     [SerializeField] private Transform target;
 
+    public void SetTarget(Transform t) => target = t;
+
     [Header("Follow")]
     [SerializeField] private float smoothTime = 0.2f;
     [SerializeField] private bool useSmoothDamp = true;

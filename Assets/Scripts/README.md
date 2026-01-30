@@ -25,16 +25,29 @@ Basic scripts for the Unity 2D sample scene.
 3. Drag **Square** from the Hierarchy into the **Target** field (or assign in the inspector).
 4. Optional: adjust **Smooth Time** (default 0.2).
 
-### 3. Game Manager (optional)
+### 3. Game Manager (required for Start Over)
 
 1. Create empty GameObject: **Right‑click Hierarchy** → **Create Empty** → name it `GameManager`.
 2. **Add Component** → search `GameManager` → add.
-3. Use from UI or other scripts: `GameManager.Instance.RestartCurrentScene()` or `GameManager.Instance.QuitGame()`.
+
+### 4. Death (fall off = break apart + red screen + RIP)
+
+1. **Player**: Select **Square** → **Add Component** → `PlayerDeathHandler`. Set **Death Y Threshold** below your platform (e.g. **-5**; ground is ~-1.5).
+2. **Death UI**: Create empty GameObject → name it `DeathUI` → **Add Component** → `DeathUI`. It builds the red overlay and RIP panel at runtime. No extra setup.
+3. **Optional – pit trigger**: Create empty GameObject, add **Box Collider 2D** (or any 2D collider), check **Is Trigger**, place below the level. Add component `DeathZone`. Player dies when entering the trigger.
 
 ## Controls (default Input Manager)
 
 - **Horizontal**: A/D or Left/Right arrows
 - **Jump**: Space or Jump button
+
+## Death flow
+
+When the player’s Y goes below **Death Y Threshold** (or enters a **DeathZone** trigger):
+
+1. Player breaks into pieces (same sprite, small bits with physics).
+2. Red overlay fades in.
+3. RIP panel appears with **Start Over** button (restarts the scene via `GameManager`).
 
 ## Build settings
 
