@@ -31,9 +31,8 @@ public class CameraFollow2D : MonoBehaviour
         }
         else
         {
-            transform.position = Vector3.Lerp(transform.position, goal, 1f - Mathf.Exp(-10f * Time.deltaTime));
+            // Simple framerate-independent lerp
+            transform.position = Vector3.Lerp(transform.position, goal, 1f - Mathf.Pow(0.01f, Time.deltaTime));
         }
-
-        transform.position = new Vector3(transform.position.x, transform.position.y, zPosition);
     }
 }

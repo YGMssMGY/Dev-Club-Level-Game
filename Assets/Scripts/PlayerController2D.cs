@@ -41,22 +41,19 @@ public class PlayerController2D : MonoBehaviour
 
     private void FixedUpdate()
     {
-        // Apply jump in FixedUpdate so it syncs with physics
+        Vector2 velocity = _rb.linearVelocity;
+
         if (_jumpRequested)
         {
             _jumpRequested = false;
-            bool canJump = _isGrounded || (_rb.linearVelocity.y >= -coyoteVelocityThreshold && _rb.linearVelocity.y <= coyoteVelocityThreshold);
-            if (canJump)
+            // Allow jump if grounded or within coyote time threshold
+            if (_isGrounded || Mathf.Abs(velocity.y) <= coyoteVelocityThreshold)
             {
-                Vector2 v = _rb.linearVelocity;
-                v.y = jumpForce;
-                _rb.linearVelocity = v;
+                velocity.y = jumpForce;
             }
         }
 
-        float horizontal = Input.GetAxisRaw("Horizontal");
-        Vector2 velocity = _rb.linearVelocity;
-        velocity.x = horizontal * moveSpeed;
+        velocity.x = Input.GetAxisRaw("Horizontal") * moveSpeed;
         _rb.linearVelocity = velocity;
     }
 
