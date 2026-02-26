@@ -61,3 +61,6 @@ If setting up a new scene from scratch:
 1.  **Player:** Add `PlayerController2D` and `PlayerDeathHandler` to your player GameObject.
 2.  **Camera:** Add `CameraFollow2D` to the Main Camera and assign the Player as the target.
 3.  **Managers:** Create empty GameObjects for `GameManager` and `DeathUI` and attach their respective scripts.
+
+### Additional Coding Preferencies
+- Keep codes simple

@@ -13,6 +13,13 @@ public class PlayerController2D : MonoBehaviour
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float jumpForce = 10f;
 
+    [Header("Input Config")]
+    [SerializeField] private bool useCustomKeys = false;
+    [SerializeField] private string horizontalAxis = "Horizontal";
+    [SerializeField] private KeyCode jumpKey = KeyCode.Space;
+    [SerializeField] private KeyCode leftKey = KeyCode.A;
+    [SerializeField] private KeyCode rightKey = KeyCode.D;
+
     [Header("Ground Check")]
     [SerializeField] private LayerMask groundLayer = ~0;
     [Tooltip("Larger radius (0.2–0.3) helps catch ground reliably.")]
@@ -26,6 +33,14 @@ public class PlayerController2D : MonoBehaviour
     private bool _isGrounded;
     private bool _jumpRequested;
 
+    public void ConfigureInput(KeyCode jump, KeyCode left, KeyCode right)
+    {
+        useCustomKeys = true;
+        jumpKey = jump;
+        leftKey = left;
+        rightKey = right;
+    }
+
     private void Awake()
     {
         _rb = GetComponent<Rigidbody2D>();
@@ -35,8 +50,16 @@ public class PlayerController2D : MonoBehaviour
     {
         CheckGrounded();
 
-        if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
-            _jumpRequested = true;
+        if (useCustomKeys)
+        {
+            if (Input.GetKeyDown(jumpKey))
+                _jumpRequested = true;
+        }
+        else
+        {
+            if (Input.GetButtonDown("Jump") || Input.GetKeyDown(KeyCode.Space))
+                _jumpRequested = true;
+        }
     }
 
     private void FixedUpdate()
@@ -53,7 +76,18 @@ public class PlayerController2D : MonoBehaviour
             }
         }
 
-        velocity.x = Input.GetAxisRaw("Horizontal") * moveSpeed;
+        float horizontalInput = 0f;
+        if (useCustomKeys)
+        {
+            if (Input.GetKey(leftKey)) horizontalInput -= 1f;
+            if (Input.GetKey(rightKey)) horizontalInput += 1f;
+        }
+        else
+        {
+            horizontalInput = Input.GetAxisRaw(horizontalAxis);
+        }
+
+        velocity.x = horizontalInput * moveSpeed;
         _rb.linearVelocity = velocity;
     }
 

@@ -23,6 +23,7 @@ public class DeathUI : MonoBehaviour
     private Canvas _canvas;
     private Image _redOverlay;
     private GameObject _ripPanel;
+    private Text _ripTextComponent;
     private bool _shown;
 
     private void Awake()
@@ -96,13 +97,13 @@ public class DeathUI : MonoBehaviour
 
         GameObject ripTextGo = new GameObject("RIPText");
         ripTextGo.transform.SetParent(panel.transform, false);
-        Text ripTextComponent = ripTextGo.AddComponent<Text>();
-        ripTextComponent.text = ripText;
-        ripTextComponent.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        ripTextComponent.fontSize = 72;
-        ripTextComponent.alignment = TextAnchor.MiddleCenter;
-        ripTextComponent.color = Color.white;
-        ripTextComponent.raycastTarget = false;
+        _ripTextComponent = ripTextGo.AddComponent<Text>();
+        _ripTextComponent.text = ripText;
+        _ripTextComponent.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _ripTextComponent.fontSize = 72;
+        _ripTextComponent.alignment = TextAnchor.MiddleCenter;
+        _ripTextComponent.color = Color.white;
+        _ripTextComponent.raycastTarget = false;
         RectTransform textRt = ripTextGo.GetComponent<RectTransform>();
         textRt.anchorMin = new Vector2(0.5f, 0.6f);
         textRt.anchorMax = new Vector2(0.5f, 0.6f);
@@ -147,6 +148,16 @@ public class DeathUI : MonoBehaviour
             GameManager.Instance.RestartCurrentScene();
         else
             UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+    }
+
+    public void ShowWinnerSequence(string winnerName)
+    {
+        if (_shown) return;
+        _shown = true;
+        gameObject.SetActive(true);
+        if (_ripTextComponent != null)
+            _ripTextComponent.text = winnerName + " WINS!";
+        StartCoroutine(RedFlashThenRIP());
     }
 
     public void ShowDeathSequence()

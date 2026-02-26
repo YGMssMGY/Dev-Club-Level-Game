@@ -45,15 +45,29 @@ public class PlayerDeathHandler : MonoBehaviour
         if (_isDead) return;
         _isDead = true;
 
+        var health = GetComponent<PlayerHealth>();
+        if (health != null && health.GetCurrentHealth() > 0)
+        {
+            health.TakeDamage(health.GetCurrentHealth()); // Trigger health 0 but don't recurse
+        }
+
         if (_controller != null) _controller.enabled = false;
         if (_rb != null) _rb.simulated = false;
         _spriteRenderer.enabled = false;
 
         var cam = FindFirstObjectByType<CameraFollow2D>();
-        if (cam != null) cam.SetTarget(null);
+        // Only clear camera target if it's currently following this player
+        if (cam != null && cam.transform.parent == null) // Assuming camera follow logic
+        {
+            // We'll let GameManager handle camera if needed
+        }
 
         SpawnBreakPieces();
-        StartCoroutine(NotifyDeathUIAfterDelay(0.3f));
+        
+        if (GameManager.Instance != null)
+            GameManager.Instance.OnPlayerDied(gameObject);
+        else
+            StartCoroutine(NotifyDeathUIAfterDelay(0.3f));
     }
 
     private void SpawnBreakPieces()
