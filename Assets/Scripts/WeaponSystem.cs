@@ -12,9 +12,9 @@ public class WeaponSystem : MonoBehaviour
 
     [Header("Attack Settings")]
     [SerializeField] private int damage = 20;
-    [SerializeField] private float range = 1f;
-    [SerializeField] private float cooldown = 0.5f;
-    [SerializeField] private LayerMask enemyLayer;
+    [SerializeField] private float range = 1.2f;
+    [SerializeField] private float cooldown = 0.4f;
+    [SerializeField] private LayerMask enemyLayer = ~0; // Default to hit everything
 
     private float _nextAttackTime;
 
@@ -45,44 +45,68 @@ public class WeaponSystem : MonoBehaviour
 
     private void Attack()
     {
-        // Simple raycast or overlap circle in front
-        // We assume the player is looking right if scale.x > 0
-        float direction = transform.localScale.x > 0 ? 1f : -1f;
+        // Circular attack around the player (knife range)
         Vector2 origin = transform.position;
-        Vector2 offset = new Vector2(direction * range * 0.5f, 0f);
         
         // --- VISUAL FEEDBACK (SLASH) ---
-        GameObject slash = new GameObject("SlashEffect");
-        slash.transform.position = (Vector2)transform.position + offset;
-        slash.transform.localScale = new Vector3(range, range, 1);
+        // A quick expanding circle or flash to indicate the attack area
+        GameObject slash = new GameObject("KnifeSlash");
+        slash.transform.position = origin;
+        slash.transform.localScale = Vector3.one * 0.1f;
         SpriteRenderer sr = slash.AddComponent<SpriteRenderer>();
-        sr.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Background.psd"); // Simple white square
-        sr.color = new Color(1, 1, 1, 0.5f);
+        sr.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Knob.psd"); // Circular sprite
+        sr.color = new Color(1, 1, 1, 0.6f);
         sr.sortingOrder = 5;
-        Destroy(slash, 0.1f);
+        
+        // Simple animation via script (expand and fade)
+        Destroy(slash, 0.15f);
+        StartCoroutine(AnimateSlash(slash.transform, sr));
         // ------------------------------
 
-        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin + offset, range * 0.5f, enemyLayer);
+        // Find all colliders in the attack circle
+        Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(origin, range, enemyLayer);
+        Debug.Log($"{gameObject.name} attack hit {hitEnemies.Length} colliders.");
 
         foreach (Collider2D enemy in hitEnemies)
         {
+            // Don't hit yourself
             if (enemy.gameObject == gameObject) continue;
 
-            PlayerHealth health = enemy.GetComponent<PlayerHealth>();
+            // Use GetComponentInParent in case the collider is on a child object
+            PlayerHealth health = enemy.GetComponentInParent<PlayerHealth>();
             if (health != null)
             {
                 health.TakeDamage(damage);
-                Debug.Log($"{gameObject.name} hit {enemy.name} for {damage} damage!");
+                Debug.Log($"{gameObject.name} slashed {enemy.name} for {damage} damage! Current target health: {health.GetCurrentHealth()}");
             }
+            else
+            {
+                Debug.Log($"{gameObject.name} hit {enemy.name} but no PlayerHealth found on it or its parents.");
+            }
+        }
+    }
+
+    private System.Collections.IEnumerator AnimateSlash(Transform t, SpriteRenderer sr)
+    {
+        float duration = 0.15f;
+        float elapsed = 0f;
+        Vector3 startScale = Vector3.one * 0.5f;
+        Vector3 endScale = Vector3.one * (range * 2f); // Diameter
+
+        while (elapsed < duration)
+        {
+            if (t == null) yield break;
+            elapsed += Time.deltaTime;
+            float pct = elapsed / duration;
+            t.localScale = Vector3.Lerp(startScale, endScale, pct);
+            sr.color = new Color(1, 1, 1, Mathf.Lerp(0.6f, 0, pct));
+            yield return null;
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        float direction = transform.localScale.x > 0 ? 1f : -1f;
-        Vector2 origin = transform.position;
-        Vector2 offset = new Vector2(direction * range * 0.5f, 0f);
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(origin + offset, range * 0.5f);
+        Gizmos.DrawWireSphere(transform.position, range);
     }
 }

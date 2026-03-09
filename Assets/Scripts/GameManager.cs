@@ -69,16 +69,15 @@ public class GameManager : MonoBehaviour
                 ctrl.ConfigureInput(KeyCode.Space, KeyCode.A, KeyCode.D);
                 weapon.ConfigureInput(KeyCode.F);
             }
-            else // P2 (Arrows + R-Ctrl)
+            else // P2 (Arrows + /)
             {
                 ctrl.ConfigureInput(KeyCode.UpArrow, KeyCode.LeftArrow, KeyCode.RightArrow);
-                weapon.ConfigureInput(KeyCode.RightControl);
+                weapon.ConfigureInput(KeyCode.Slash);
             }
 
             // --- WEAPON CONFIG ---
-            // Let them hit everything EXCEPT themselves. 
-            // In a simple setup, Default layer is fine but we can exclude current.
-            // For now, let's just make sure the weapon exists.
+            // Allow them to hit everything (players are usually on default or have colliders)
+            // But we already handle self-hit in WeaponSystem.cs
             // ---------------------
 
             // Setup Health Bar
@@ -87,6 +86,7 @@ public class GameManager : MonoBehaviour
             
             bar.Setup(pName, pColor, anchor);
             health.OnHealthChanged += bar.UpdateHealth;
+            health.RefreshUI();
             
             // Give them colors for easier identification
             SpriteRenderer sr = go.GetComponent<SpriteRenderer>();

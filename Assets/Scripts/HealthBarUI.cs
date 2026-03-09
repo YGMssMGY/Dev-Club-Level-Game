@@ -22,6 +22,9 @@ public class HealthBarUI : MonoBehaviour
             canvasObj.AddComponent<GraphicRaycaster>();
         }
 
+        // Create a simple white sprite if it doesn't exist
+        Sprite whiteSprite = CreateWhiteSprite();
+
         GameObject barObj = new GameObject(playerName + "_HealthBar");
         barObj.transform.SetParent(canvas.transform, false);
         _container = barObj.AddComponent<RectTransform>();
@@ -34,7 +37,8 @@ public class HealthBarUI : MonoBehaviour
         GameObject bgObj = new GameObject("Background");
         bgObj.transform.SetParent(barObj.transform, false);
         Image bg = bgObj.AddComponent<Image>();
-        bg.color = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+        bg.sprite = whiteSprite;
+        bg.color = new Color(0.1f, 0.1f, 0.1f, 0.9f);
         RectTransform bgRT = bgObj.GetComponent<RectTransform>();
         bgRT.anchorMin = Vector2.zero;
         bgRT.anchorMax = Vector2.one;
@@ -44,6 +48,7 @@ public class HealthBarUI : MonoBehaviour
         GameObject fillObj = new GameObject("Fill");
         fillObj.transform.SetParent(barObj.transform, false);
         _fill = fillObj.AddComponent<Image>();
+        _fill.sprite = whiteSprite;
         _fill.type = Image.Type.Filled;
         _fill.fillMethod = Image.FillMethod.Horizontal;
         _fill.fillAmount = 1.0f;
@@ -60,46 +65,35 @@ public class HealthBarUI : MonoBehaviour
         _nameLabel.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         _nameLabel.text = playerName;
         _nameLabel.alignment = TextAnchor.MiddleLeft;
-        _nameLabel.fontSize = 14;
+        _nameLabel.fontSize = 16;
         _nameLabel.color = Color.white;
+        _nameLabel.fontStyle = FontStyle.Bold;
         RectTransform labelRT = labelObj.GetComponent<RectTransform>();
         labelRT.anchorMin = new Vector2(0, 1);
         labelRT.anchorMax = new Vector2(1, 1);
         labelRT.pivot = new Vector2(0, 0);
         labelRT.anchoredPosition = new Vector2(0, 5);
-        labelRT.sizeDelta = new Vector2(0, 20);
+        labelRT.sizeDelta = new Vector2(0, 25);
+        
+        // Add a shadow to the label
+        labelObj.AddComponent<Shadow>().effectDistance = new Vector2(1, -1);
+    }
 
-        // Weapon Slot
-        GameObject slotObj = new GameObject("WeaponSlot");
-        slotObj.transform.SetParent(barObj.transform, false);
-        Image slotImg = slotObj.AddComponent<Image>();
-        slotImg.color = new Color(1, 1, 1, 0.3f);
-        RectTransform slotRT = slotObj.GetComponent<RectTransform>();
-        slotRT.anchorMin = new Vector2(1, 0.5f);
-        slotRT.anchorMax = new Vector2(1, 0.5f);
-        slotRT.pivot = new Vector2(0, 0.5f);
-        slotRT.anchoredPosition = new Vector2(10, 0);
-        slotRT.sizeDelta = new Vector2(30, 30);
-
-        GameObject slotLabel = new GameObject("SlotLabel");
-        slotLabel.transform.SetParent(slotObj.transform, false);
-        Text sl = slotLabel.AddComponent<Text>();
-        sl.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        sl.text = "W";
-        sl.alignment = TextAnchor.MiddleCenter;
-        sl.fontSize = 12;
-        sl.color = Color.white;
-        RectTransform slRT = slotLabel.GetComponent<RectTransform>();
-        slRT.anchorMin = Vector2.zero;
-        slRT.anchorMax = Vector2.one;
-        slRT.sizeDelta = Vector2.zero;
+    private Sprite CreateWhiteSprite()
+    {
+        Texture2D tex = new Texture2D(1, 1);
+        tex.SetPixel(0, 0, Color.white);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, 1, 1), new Vector2(0.5f, 0.5f));
     }
 
     public void UpdateHealth(int current, int max)
     {
         if (_fill != null)
         {
-            _fill.fillAmount = (float)current / max;
+            float amount = (float)current / max;
+            _fill.fillAmount = amount;
+            Debug.Log($"UI Update: {_fill.transform.parent.name} fillAmount set to {amount} ({current}/{max})");
         }
     }
 }

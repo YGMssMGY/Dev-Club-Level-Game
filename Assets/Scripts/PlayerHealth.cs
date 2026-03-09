@@ -17,6 +17,7 @@ public class PlayerHealth : MonoBehaviour
 
     private void Awake()
     {
+        if (maxHealth <= 0) maxHealth = 100;
         _currentHealth = maxHealth;
         _deathHandler = GetComponent<PlayerDeathHandler>();
     }
@@ -38,6 +39,7 @@ public class PlayerHealth : MonoBehaviour
         _currentHealth -= amount;
         _currentHealth = Mathf.Clamp(_currentHealth, 0, maxHealth);
         
+        Debug.Log($"{gameObject.name} Health: {_currentHealth}/{maxHealth}");
         OnHealthChanged?.Invoke(_currentHealth, maxHealth);
 
         if (_currentHealth <= 0)
